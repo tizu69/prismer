@@ -25,20 +25,21 @@ export default async (
 	await $`mkdir -p ${ipath}`;
 
 	const running: Record<string, true> = {};
+	let percentage: number, est: number;
 	const updateRunning = (as: string) => {
 		if (running[as]) delete running[as];
 		else running[as] = true;
 		const completedTasks = count;
-		const percentage = Math.round((completedTasks / totalTasks) * 100);
+		percentage = Math.round((completedTasks / totalTasks) * 100);
 		const elapsedTime = (Date.now() - startTime) / 1000;
 		const taskTime = elapsedTime / (completedTasks || 1);
 		const remainingTasks = totalTasks - completedTasks;
-		const est = Math.round(remainingTasks * taskTime);
+		est = Math.round(remainingTasks * taskTime);
 
-		s.message(
+		/* s.message(
 			`[${percentage}%, ${percentage != 0 ? formatMillis(est * 1000) : "∞"}] ` +
 				Object.keys(running).join(", "),
-		);
+		); */
 	};
 
 	const limit = pLimit(1); // TODO: running multiple IO operations at once can actually slow this down :(
@@ -49,10 +50,10 @@ export default async (
 			try {
 				// TODO: remove
 				const now = async (rn: string) => {
-					/* s.message(
-						`[${percentage}%, ${timeRemaining}s] "${name}": ${rn}`,
-					); */
-					// await Bun.sleep(1);
+					s.message(
+						`[${percentage}%, ${percentage != 0 ? formatMillis(est * 1000) : "∞"}] "${name}": ${rn}`,
+					);
+					await Bun.sleep(1);
 				};
 
 				const path = join(curdir, "../Prismer", name);
